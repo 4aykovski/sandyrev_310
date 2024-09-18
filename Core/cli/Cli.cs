@@ -4,13 +4,13 @@ namespace Core.cli;
 
 public class Cli
 {
-    private IGuessService GuessService { get; set; }
-    private string ExitMessage { get; set; }
+    private IGuessService _guessService { get; set; }
+    private string _exitMessage { get; set; }
 
     public Cli(IGuessService guessService, string exitMessage)
     {
-        GuessService = guessService;
-        ExitMessage = exitMessage;
+        _guessService = guessService;
+        _exitMessage = exitMessage;
     }
 
     public void Run()
@@ -42,48 +42,55 @@ public class Cli
         }
     }
 
-    public void Start()
+    private void Start()
     {
-        GuessService.RandomNumber();
+        _guessService.SetUpGame();
         Console.WriteLine(
-            $"if you want to exit from game type {ExitMessage} in any moment");
+            $"if you want to exit from game type {_exitMessage} in any moment");
 
         while (true)
         {
-            int number;
             try
             {
                 Console.Write("Enter number: ");
-                number = GetNumberFromConsole();
+                int number = GetNumberFromConsole();
+
+                if (!_guessService.CheckNumber(number))
+                {
+                    Console.WriteLine("wrong number");
+                    continue;
+                }
             }
             catch (Exception ex)
             {
-                if (ex.Message == ExitMessage)
+                if (ex.Message == _exitMessage)
                     return;
+
+                if (ex.Message == "no tries left")
+                {
+                    Console.WriteLine(ex.Message);
+                    return;
+                }
 
                 Console.WriteLine(ex.Message);
                 continue;
             }
 
-            if (!GuessService.CheckNumber(number))
-            {
-                Console.WriteLine("wrong number");
-                continue;
-            }
+            Console.WriteLine("you win! congratulations!");
 
             break;
         }
     }
 
-    public void Configure()
+    private void Configure()
     {
         Console.WriteLine("configure game");
         Console.WriteLine(
-            $"if you want to exit from configuration type {ExitMessage} in any moment");
+            $"if you want to exit from configuration type {_exitMessage} in any moment");
 
         while (true)
         {
-            int min, max;
+            int min, max, tries;
             try
             {
                 Console.Write("Enter maximum of interval: ");
@@ -91,17 +98,27 @@ public class Cli
 
                 Console.Write("Enter minimum of interval: ");
                 min = GetNumberFromConsole();
+
+                Console.Write("Enter maximum of tries: ");
+                tries = GetNumberFromConsole();
+
+                if (tries < 1)
+                    throw new Exception("invalid input");
+
+                if (min > max)
+                    throw new Exception("invalid input");
             }
             catch (Exception ex)
             {
-                if (ex.Message == ExitMessage)
+                if (ex.Message == _exitMessage)
                     return;
 
                 Console.WriteLine(ex.Message);
                 continue;
             }
 
-            GuessService.Configure(new ConfigureInput { Min = min, Max = max });
+            _guessService.Configure(
+                new ConfigureInput { Min = min, Max = max, Tries = tries });
 
             break;
         }
@@ -110,8 +127,8 @@ public class Cli
     private int GetNumberFromConsole()
     {
         var numberInput = Console.ReadLine();
-        if (numberInput == ExitMessage)
-            throw new Exception(ExitMessage);
+        if (numberInput == _exitMessage)
+            throw new Exception(_exitMessage);
 
         if (!int.TryParse(numberInput, out int number))
             throw new Exception("invalid input");
