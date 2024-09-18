@@ -22,7 +22,7 @@ public class Cli
             Console.WriteLine("2 - configure game;");
             Console.WriteLine("3 - exit.");
 
-            Console.WriteLine("Enter your choice: ");
+            Console.Write("Enter your choice: ");
             var input = Console.ReadLine();
             switch (input)
             {
@@ -45,7 +45,8 @@ public class Cli
     public void Start()
     {
         GuessService.RandomNumber();
-        Console.WriteLine($"if you want to exit from game type {ExitMessage} in any moment");
+        Console.WriteLine(
+            $"if you want to exit from game type {ExitMessage} in any moment");
 
         while (true)
         {
@@ -74,11 +75,11 @@ public class Cli
         }
     }
 
-
     public void Configure()
     {
         Console.WriteLine("configure game");
-        Console.WriteLine($"if you want to exit from configuration type {ExitMessage} in any moment");
+        Console.WriteLine(
+            $"if you want to exit from configuration type {ExitMessage} in any moment");
 
         while (true)
         {
@@ -100,11 +101,7 @@ public class Cli
                 continue;
             }
 
-            GuessService.Configure(new ConfigureInput
-            {
-                Min = min,
-                Max = max
-            });
+            GuessService.Configure(new ConfigureInput { Min = min, Max = max });
 
             break;
         }
