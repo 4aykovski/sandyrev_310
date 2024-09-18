@@ -5,7 +5,7 @@ public class App
 {
     public static void Main(string[] args)
     {
-        Cli cli = new Cli(new GuessService());
+        Cli cli = new Cli(new GuessService(), "quit");
         cli.Run();
     }
 }
